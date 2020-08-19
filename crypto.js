@@ -113,7 +113,7 @@ function show(selector) {
 
 function download() {
   hide("#download-instructions");
-  const text = new XMLSerializer().serializeToString(document);
+  const text = document.documentElement.outerHTML;
   const filename = "stashed.html";
   const pom = document.createElement('a');
   pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -139,7 +139,7 @@ async function encryptClick() {
   hide('#container');
   document.querySelector('#container').innerHTML = "";
   document.querySelector('#plaintext').value = "";
-  document.querySelector('#preview').value = "";
+  document.querySelector('#preview').innerHTML = "";
   show("#download-instructions");
 }
 
