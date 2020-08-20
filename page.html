@@ -14,30 +14,22 @@
       <div style="text-align: center">
         <button id="decrypt-button">Decrypt</button>
       </div>
-      <div style="display: none;" id='download-instructions'>
-        <hr />
-        <p style='text-align: center;'>
-          You can download this html file and upload / open it anywhere, local or hosted.
-          <br />
-          Be sure to use the button below and not your browser's save page feature.
-        </p>
-        <div style="text-align: center">
-          <button id="download-button">Download</button>
-        </div>
-      </div>
     </div>
     <div class='container' id='encrypt-tools'>
       <h1 style='text-align: center;'>StashD</h1>
+      <p style='text-align: center;'>
+        StashD lets you create standalone portable password encrypted pages that are safe to keep locally or host publically.
+      </p>
       <p style='text-align: center;'>Enter some markdown here and press encrypt!</p>
       <textarea id="plaintext" style="width:100%" class='u-max-full-width'></textarea>
       <div id='preview'></div>
       <p style='display:none;' id="encrypted"></p>
-      <div>
+      <div style="text-align: center">
         <button id="encrypt-button">Encrypt</button>
       </div>
     </div>
     <div id='container' class='container'></div>
-    <button style="position: fixed; right: 1rem; bottom: 0;" id="create-button">Create an encrypted page</button>
+    <button style="display: none; position: fixed; right: 1rem; bottom: 0;" id="create-button">Create an encrypted page</button>
   </body>
 </html>
 

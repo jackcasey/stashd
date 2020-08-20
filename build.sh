@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-inliner page.html > dist/index.html
+inliner page.html > dist/stashd.html

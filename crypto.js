@@ -52,8 +52,12 @@ async function decryptData(encryptedObject, password, salt) {
 	return decryptedObject;
 }
 
-function getPassword() {
-  return prompt('Password');
+function getPasswordForEncrypt() {
+  return prompt('Enter password to encrypt the page.');
+}
+
+function getPasswordForDecrypt() {
+  return prompt('Enter the password that was used to encrypt this page.');
 }
 
 function getPlaintext() {
@@ -112,9 +116,8 @@ function show(selector) {
 }
 
 function download() {
-  hide("#download-instructions");
   const text = document.documentElement.outerHTML;
-  const filename = "stashed.html";
+  const filename = "encrypted.html";
   const pom = document.createElement('a');
   pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
   pom.setAttribute('download', filename);
@@ -129,25 +132,30 @@ function download() {
   }
 }
 
+function scrubPlaintext() {
+  document.querySelector('#container').innerHTML = "";
+  document.querySelector('#plaintext').value = "";
+  document.querySelector('#preview').innerHTML = "";
+}
+
 async function encryptClick() {
   const salt = getSalt();
-  var encrypted = await encryptData(getPlaintext(), getPassword(), salt);
+  var encrypted = await encryptData(getPlaintext(), getPasswordForEncrypt(), salt);
   encrypted = arrayBufferToBase64(encrypted);
   setEncrypted(encrypted + "|" + salt);
   show('#instructions');
   hide('#encrypt-tools');
   hide('#container');
-  document.querySelector('#container').innerHTML = "";
-  document.querySelector('#plaintext').value = "";
-  document.querySelector('#preview').innerHTML = "";
-  show("#download-instructions");
+  show("#create-button");
+  scrubPlaintext();
+  download();
 }
 
 async function decryptClick() {
   var encrypted = getEncrypted();
   const salt = encrypted.split("|")[1];
   encrypted = encrypted.split("|")[0];
-  var plaintext = await decryptData(base64ToArrayBuffer(encrypted), getPassword(), salt).catch(error => alert('Error with decryption'));
+  var plaintext = await decryptData(base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt).catch(error => alert('Error with decryption'));
   var plaintext = JSON.parse(plaintext);
   setPlaintext(plaintext);
   showDecryptedPage(plaintext);
@@ -159,6 +167,7 @@ function preview() {
 
 function createMode() {
   show('#encrypt-tools');
+  hide("#create-button");
   hide('#instructions');
   hide('#container');
   document.querySelector('#container').innerHTML = "";
@@ -170,6 +179,5 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#encrypt-button').addEventListener('click', encryptClick);
   document.querySelector('#decrypt-button').addEventListener('click', decryptClick);
   document.querySelector('#create-button').addEventListener('click', createMode);
-  document.querySelector('#download-button').addEventListener('click', download);
   document.querySelector('#plaintext').addEventListener('input', preview);
 });
