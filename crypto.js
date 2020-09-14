@@ -1,14 +1,20 @@
-const hash = "SHA-256";
+// Symmetric AES algorithm with authenticated encryption
+// Ref: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
+const encryptionAlgorithm = 'AES-GCM';
+
+// Key derivation from passphrase
+const hashAlgortihm = "SHA-256";
 const iterations = 1000;
 const keyLength = 48;
 
-async function getDerivation(hash, salt, password, iterations, keyLength) {
+
+async function getDerivation(salt, password, iterations, keyLength) {
   const textEncoder = new TextEncoder("utf-8");
   const passwordBuffer = textEncoder.encode(password);
   const importedKey = await crypto.subtle.importKey("raw", passwordBuffer, "PBKDF2", false, ["deriveBits"]);
 
   const saltBuffer = textEncoder.encode(salt);
-  const params = {name: "PBKDF2", hash: hash, salt: saltBuffer, iterations: iterations};
+  const params = {name: "PBKDF2", hash: hashAlgorithm, salt: saltBuffer, iterations: iterations};
   const derivation = await crypto.subtle.deriveBits(params, importedKey, keyLength*8);
   return derivation;
 }
@@ -18,7 +24,7 @@ async function getKey(derivation) {
   const keylen = 32;
   const derivedKey = derivation.slice(0, keylen);
   const iv = derivation.slice(keylen);
-  const importedEncryptionKey = await crypto.subtle.importKey('raw', derivedKey, { name: 'AES-CBC' }, false, ['encrypt', 'decrypt']);
+  const importedEncryptionKey = await crypto.subtle.importKey('raw', derivedKey, { name: encryptionAlgorithm }, false, ['encrypt', 'decrypt']);
   return {
     key: importedEncryptionKey,
     iv: iv
@@ -28,25 +34,25 @@ async function getKey(derivation) {
 async function encrypt(text, keyObject) {
     const textEncoder = new TextEncoder("utf-8");
     const textBuffer = textEncoder.encode(text);
-    const encryptedText = await crypto.subtle.encrypt({ name: 'AES-CBC', iv: keyObject.iv }, keyObject.key, textBuffer);
+    const encryptedText = await crypto.subtle.encrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, textBuffer);
     return encryptedText;
 }
 
 async function decrypt(encryptedText, keyObject) {
     const textDecoder = new TextDecoder("utf-8");
-    const decryptedText = await crypto.subtle.decrypt({ name: 'AES-CBC', iv: keyObject.iv }, keyObject.key, encryptedText);
+    const decryptedText = await crypto.subtle.decrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, encryptedText);
     return textDecoder.decode(decryptedText);
 }
 
 async function encryptData(text, password, salt) {
-	const derivation = await getDerivation(hash, salt, password, iterations, keyLength);
+	const derivation = await getDerivation(salt, password, iterations, keyLength);
 	const keyObject = await getKey(derivation);
 	const encryptedObject = await encrypt(JSON.stringify(text), keyObject);
 	return encryptedObject;
 }
 
 async function decryptData(encryptedObject, password, salt) {
-	const derivation = await getDerivation(hash, salt, password, iterations, keyLength);
+	const derivation = await getDerivation(salt, password, iterations, keyLength);
 	const keyObject = await getKey(derivation);
 	const decryptedObject = await decrypt(encryptedObject, keyObject);
 	return decryptedObject;
@@ -97,14 +103,14 @@ function base64ToArrayBuffer(base64) {
 }
 
 function getSalt() {
-  return Date.now().toString();
+  return window.crypto.getRandomValues(new Uint32Array(2)).join('');
 }
 
 function showDecryptedPage(decrypted) {
-  document.querySelector('#container').innerHTML = marked(decrypted);
+  document.querySelector('#decrypted').innerHTML = marked(decrypted);
   hide('#encrypt-tools');
   hide('#instructions');
-  show('#container');
+  show('#decrypted');
 }
 
 function hide(selector) {
@@ -133,7 +139,7 @@ function download() {
 }
 
 function scrubPlaintext() {
-  document.querySelector('#container').innerHTML = "";
+  document.querySelector('#decrypted').innerHTML = "";
   document.querySelector('#plaintext').value = "";
   document.querySelector('#preview').innerHTML = "";
 }
@@ -145,7 +151,7 @@ async function encryptClick() {
   setEncrypted(encrypted + "|" + salt);
   show('#instructions');
   hide('#encrypt-tools');
-  hide('#container');
+  hide('#decrypted');
   show("#create-button");
   scrubPlaintext();
   download();
@@ -169,8 +175,8 @@ function createMode() {
   show('#encrypt-tools');
   hide("#create-button");
   hide('#instructions');
-  hide('#container');
-  document.querySelector('#container').innerHTML = "";
+  hide('#decrypted');
+  document.querySelector('#decrypted').innerHTML = "";
   document.querySelector('#plaintext').value = "";
   document.querySelector('#encrypted').value = "";
 }

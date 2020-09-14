@@ -1,2 +1,3 @@
 #!/usr/bin/env sh
-inliner page.html > dist/stashd.html
+mkdir -p dist
+inliner -n page.html > dist/stashd.html
