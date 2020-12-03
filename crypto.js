@@ -3,7 +3,7 @@
 const encryptionAlgorithm = 'AES-GCM';
 
 // Key derivation from passphrase
-const hashAlgortihm = "SHA-256";
+const hashAlgorithm = "SHA-256";
 const iterations = 1000;
 const keyLength = 48;
 
