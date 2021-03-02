@@ -154,7 +154,13 @@ function scrubPlaintext() {
 }
 
 function passwordChange() {
-  document.querySelector('#encrypt-button-2').disabled = !(getPasswordForEncrypt().length > 1);
+  if (getPasswordForEncrypt().length > 1) {
+    show("#encrypt-button-2-div");
+  }
+  else
+  {
+    hide("#encrypt-button-2-div");
+  }
 }
 
 function setInstructionsMessage() {
@@ -195,7 +201,14 @@ async function decryptClick() {
 }
 
 function preview() {
-  document.querySelector('#preview').innerHTML = "<h4>Preview:</h4><hr />" + marked(document.querySelector('#plaintext').value) + "<hr />";
+  if(document.querySelector('#plaintext').value.length == 0) {
+    hide('#preview-pane');
+  }
+  else
+  {
+    show('#preview-pane');
+    document.querySelector('#preview').innerHTML = "<h4>Preview:</h4><hr />" + marked(document.querySelector('#plaintext').value) + "<hr />";
+  }
 }
 
 function createMode() {
