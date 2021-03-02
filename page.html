@@ -1,26 +1,42 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Stash</title>
+    <title>StashD</title>
     <script type="text/javascript" src="crypto.js"></script>
     <script type="text/javascript" src="marked.js"></script>
     <link rel="stylesheet" href="normalize.css">
     <link rel="stylesheet" href="skeleton.css">
   </head>
   <body>
+
     <div id='instructions' style="display: none;" class='container'>
-      <h1 style='text-align: center; margin-top: 15rem;'>StashD</h1>
-      <p style='text-align: center;'>This is a self decrypting webpage. Press Decrypt if you know the password.</p>
-      <div style="text-align: center">
+      <h1 style='text-align: center; margin-top: 5rem;'>StashD</h1>
+      <p style='text-align: center;' id="instructions-message">
+      </p>
+      <p style='text-align: center;'>
+        You can decrypt and view this page if you know the password.
+      </p>
+      <p style='text-align: center;'>
+        <label style='text-align: center;' for="decrypt-password">Password:</label>
+        <input type='password' name="decrypt-password" id="decrypt-password"></input><br />
         <button id="decrypt-button">Decrypt</button>
-      </div>
+      </p>
+      <hr />
+      <p style='text-align: center;'>
+        Download this encrypted page for keeping offline or self-hosting.<br />
+        <button id="download-button">Download</button>
+      </p>
     </div>
+
     <div class='container' id='encrypt-tools'>
-      <h1 style='text-align: center;'>StashD</h1>
+      <h1 style='text-align: center; margin-top: 5rem;'>StashD</h1>
       <p style='text-align: center;'>
         StashD lets you create standalone portable password encrypted pages that are safe to keep locally or host publically.
       </p>
-      <p style='text-align: center;'>Enter some markdown here and press encrypt!</p>
+      <p style='text-align: center;'>
+        Also the page itself is also the tool for encrypting more pages.
+      </p>
+      <p style='text-align: center;'>Enter some markdown below and press encrypt!</p>
       <textarea id="plaintext" style="width:100%" class='u-max-full-width'></textarea>
       <div id='preview'></div>
       <p style='display:none;' id="encrypted"></p>
@@ -28,7 +44,30 @@
         <button id="encrypt-button">Encrypt</button>
       </div>
     </div>
+
+    <div style="display: none;" class='container' id='password-step'>
+      <h1 style='text-align: center; margin-top: 5rem;'>Encrypt</h1>
+      <p style='text-align: center;'>
+        Encrypt your content with a password. The encrypted text will be stored in a hidden page element.
+      </p>
+      <p style='text-align: center;'>
+        Include a short (plaintext / unencrypted) message at the top of the page.<br />
+        <input class='u-full-width' type='text' name="encrypt-message" id="encrypt-message" value="This is a self decrypting webpage." />
+      </p>
+      <p style='text-align: center;'>
+        <label style='text-align: center;' for="encrypt-password">Password:</label>
+        <input type='password' name="encrypt-password" id="encrypt-password"></input><br />
+        (Please use a long and strong passphrase.)
+      </p>
+      <div style="text-align: center">
+        <button id="encrypt-button-2">Go</button>
+      </div>
+    </div>
+
     <div id='decrypted' class='container'></div>
-    <button style="display: none; position: fixed; right: 1rem; bottom: 0;" id="create-button">Create an encrypted page</button>
+
+    <button style="display: none; position: fixed; right: 1rem; bottom: 0;" id="create-button">Create another encrypted page</button>
+
+    <div style="position: fixed; left: 1rem; bottom: 1rem; font-size: 1rem; color: #aaa;">Code and more info @ <a href="https://github.com/jackcasey/stashd">github.com/jackcasey/stashd</a></div>
   </body>
 </html>

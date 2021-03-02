@@ -59,11 +59,11 @@ async function decryptData(encryptedObject, password, salt) {
 }
 
 function getPasswordForEncrypt() {
-  return prompt('Enter password to encrypt the page.');
+  return document.querySelector('#encrypt-password').value;
 }
 
 function getPasswordForDecrypt() {
-  return prompt('Enter the password that was used to encrypt this page.');
+  return document.querySelector('#decrypt-password').value;
 }
 
 function getPlaintext() {
@@ -108,13 +108,22 @@ function getSalt() {
 
 function showDecryptedPage(decrypted) {
   document.querySelector('#decrypted').innerHTML = marked(decrypted);
-  hide('#encrypt-tools');
-  hide('#instructions');
+  hideAll();
   show('#decrypted');
 }
 
 function hide(selector) {
   document.querySelector(selector).style.display = 'none';
+}
+
+function hideAll() {
+  hide('#encrypt-tools');
+  hide('#instructions');
+  hide('#password-step');
+  hide('#decrypted');
+  hide("#create-button");
+  document.querySelector('#encrypt-password').value = "";
+  document.querySelector('#decrypt-password').value = "";
 }
 
 function show(selector) {
@@ -144,16 +153,34 @@ function scrubPlaintext() {
   document.querySelector('#preview').innerHTML = "";
 }
 
+function passwordChange() {
+  document.querySelector('#encrypt-button-2').disabled = !(getPasswordForEncrypt().length > 1);
+}
+
+function setInstructionsMessage() {
+  document.querySelector('#instructions-message').innerHTML = document.querySelector("#encrypt-message").value;
+  document.querySelector("#encrypt-message").value = "";
+}
+
 async function encryptClick() {
+  hideAll();
+  passwordChange();
+  show('#password-step');
+}
+
+async function encrypt2Click() {
   const salt = getSalt();
   var encrypted = await encryptData(getPlaintext(), getPasswordForEncrypt(), salt);
   encrypted = arrayBufferToBase64(encrypted);
   setEncrypted(encrypted + "|" + salt);
-  show('#instructions');
-  hide('#encrypt-tools');
-  hide('#decrypted');
-  show("#create-button");
   scrubPlaintext();
+  setInstructionsMessage();
+  hideAll();
+  show('#instructions');
+  show("#create-button");
+}
+
+function downloadClick() {
   download();
 }
 
@@ -172,10 +199,8 @@ function preview() {
 }
 
 function createMode() {
+  hideAll();
   show('#encrypt-tools');
-  hide("#create-button");
-  hide('#instructions');
-  hide('#decrypted');
   document.querySelector('#decrypted').innerHTML = "";
   document.querySelector('#plaintext').value = "";
   document.querySelector('#encrypted').value = "";
@@ -183,7 +208,11 @@ function createMode() {
 
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#encrypt-button').addEventListener('click', encryptClick);
+  document.querySelector('#encrypt-button-2').addEventListener('click', encrypt2Click);
   document.querySelector('#decrypt-button').addEventListener('click', decryptClick);
+  document.querySelector('#download-button').addEventListener('click', downloadClick);
   document.querySelector('#create-button').addEventListener('click', createMode);
   document.querySelector('#plaintext').addEventListener('input', preview);
+  document.querySelector('#encrypt-password').addEventListener('input', passwordChange);
+  document.querySelector('#encrypt-password').addEventListener('input', passwordChange);
 });
