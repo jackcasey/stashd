@@ -122,6 +122,7 @@ function hideAll() {
   hide('#password-step');
   hide('#decrypted');
   hide("#create-button");
+  hide("#download-step");
   document.querySelector('#encrypt-password').value = "";
   document.querySelector('#decrypt-password').value = "";
 }
@@ -132,7 +133,7 @@ function show(selector) {
 
 function download() {
   const text = document.documentElement.outerHTML;
-  const filename = "encrypted.html";
+  const filename = document.querySelector('#filename').value;
   const pom = document.createElement('a');
   pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
   pom.setAttribute('download', filename);
@@ -182,12 +183,19 @@ async function encrypt2Click() {
   scrubPlaintext();
   setInstructionsMessage();
   hideAll();
-  show('#instructions');
-  show("#create-button");
+  show('#download-step');
 }
 
 function downloadClick() {
+  // alter the page first, before downloading the content
+  finishDownloadClick();
   download();
+}
+
+function finishDownloadClick() {
+  hideAll();
+  show('#instructions');
+  show("#create-button");
 }
 
 async function decryptClick() {
@@ -224,8 +232,8 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#encrypt-button-2').addEventListener('click', encrypt2Click);
   document.querySelector('#decrypt-button').addEventListener('click', decryptClick);
   document.querySelector('#download-button').addEventListener('click', downloadClick);
+  document.querySelector('#skip-download-button').addEventListener('click', finishDownloadClick);
   document.querySelector('#create-button').addEventListener('click', createMode);
   document.querySelector('#plaintext').addEventListener('input', preview);
-  document.querySelector('#encrypt-password').addEventListener('input', passwordChange);
   document.querySelector('#encrypt-password').addEventListener('input', passwordChange);
 });

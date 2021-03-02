@@ -23,10 +23,26 @@
       <p style='text-align: center;'>
         <button class="button-primary" id="decrypt-button">Decrypt</button>
       </p>
+    </div>
+
+    <div id='download-step' style="display: none;" class='container'>
+      <h1 style='text-align: center; margin-top: 3rem;'>StashD</h1>
+      <hr />
+      <p>
+        Download and save your encrypted page so you can keep it safely offline or self-host it.
+      </p>
       <hr />
       <p style='text-align: center;'>
-        <button id="download-button">Download</button><br />
-        (Download this encrypted page for keeping offline or self-hosting.)
+        <label for="download-button">Filename:</label>
+        <input type='text' name="filename" id="filename" value='encrypted.html' />
+        <button class="button-primary" id="download-button">Download</button>
+      </p>
+      <p style='text-align: center;'>
+        Or;
+      </p>
+      <p style='text-align: center;'>
+        <button id="skip-download-button">Skip download and go straight to view</button><br />
+        (You can also download the page when viewing it by using your browser's save page functionality.)
       </p>
     </div>
 
@@ -35,6 +51,9 @@
       <hr />
       <p>
         StashD creates standalone portable password encrypted pages that are safe to keep locally or host publically.
+      </p>
+      <p>
+        It is recommended that you test this tool thoroughly before using it for anything important.
       </p>
       <p>Enter some <a href="https://github.github.com/gfm/">markdown</a> below to get started:</p>
       <textarea id="plaintext" style="width:100%" class='u-max-full-width'></textarea>
