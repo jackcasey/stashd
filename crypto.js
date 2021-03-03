@@ -1,12 +1,13 @@
 // Symmetric AES algorithm with authenticated encryption
 // Ref: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
-const encryptionAlgorithm = 'AES-GCM';
+const encryptionAlgorithm = "AES-GCM";
 
 // Key derivation from passphrase
 const hashAlgorithm = "SHA-256";
 const iterations = 1000;
 const keyLength = 48;
 
+/* global marked */
 
 async function getDerivation(salt, password, iterations, keyLength) {
   const textEncoder = new TextEncoder("utf-8");
@@ -20,70 +21,69 @@ async function getDerivation(salt, password, iterations, keyLength) {
 }
 
 async function getKey(derivation) {
-  const ivlen = 16;
   const keylen = 32;
   const derivedKey = derivation.slice(0, keylen);
   const iv = derivation.slice(keylen);
-  const importedEncryptionKey = await crypto.subtle.importKey('raw', derivedKey, { name: encryptionAlgorithm }, false, ['encrypt', 'decrypt']);
+  const importedEncryptionKey = await crypto.subtle.importKey("raw", derivedKey, { name: encryptionAlgorithm }, false, ["encrypt", "decrypt"]);
   return {
     key: importedEncryptionKey,
     iv: iv
-  }
+  };
 }
 
 async function encrypt(text, keyObject) {
-    const textEncoder = new TextEncoder("utf-8");
-    const textBuffer = textEncoder.encode(text);
-    const encryptedText = await crypto.subtle.encrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, textBuffer);
-    return encryptedText;
+  const textEncoder = new TextEncoder("utf-8");
+  const textBuffer = textEncoder.encode(text);
+  const encryptedText = await crypto.subtle.encrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, textBuffer);
+  return encryptedText;
 }
 
 async function decrypt(encryptedText, keyObject) {
-    const textDecoder = new TextDecoder("utf-8");
-    const decryptedText = await crypto.subtle.decrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, encryptedText);
-    return textDecoder.decode(decryptedText);
+  const textDecoder = new TextDecoder("utf-8");
+  const decryptedText = await crypto.subtle.decrypt({ name: encryptionAlgorithm, iv: keyObject.iv }, keyObject.key, encryptedText);
+  return textDecoder.decode(decryptedText);
 }
 
 async function encryptData(text, password, salt) {
-	const derivation = await getDerivation(salt, password, iterations, keyLength);
-	const keyObject = await getKey(derivation);
-	const encryptedObject = await encrypt(JSON.stringify(text), keyObject);
-	return encryptedObject;
+  const derivation = await getDerivation(salt, password, iterations, keyLength);
+  const keyObject = await getKey(derivation);
+  const encryptedObject = await encrypt(JSON.stringify(text), keyObject);
+  return encryptedObject;
 }
 
 async function decryptData(encryptedObject, password, salt) {
-	const derivation = await getDerivation(salt, password, iterations, keyLength);
-	const keyObject = await getKey(derivation);
-	const decryptedObject = await decrypt(encryptedObject, keyObject);
-	return decryptedObject;
+  const derivation = await getDerivation(salt, password, iterations, keyLength);
+  const keyObject = await getKey(derivation);
+  const decryptedObject = await decrypt(encryptedObject, keyObject);
+  return decryptedObject;
 }
 
 function getPasswordForEncrypt() {
-  return document.querySelector('#encrypt-password').value;
+  return document.querySelector("#encrypt-password").value;
 }
 
 function getPasswordForDecrypt() {
-  return document.querySelector('#decrypt-password').value;
+  return document.querySelector("#decrypt-password").value;
 }
 
 function getPlaintext() {
-  return document.querySelector('#plaintext').value;
+  return document.querySelector("#plaintext").value;
 }
 
 function getEncrypted() {
-  return document.querySelector('#encrypted').innerHTML;
+  return document.querySelector("#encrypted").innerHTML;
 }
 
 function setPlaintext(text) {
-  document.querySelector('#plaintext').value = text;
+  document.querySelector("#plaintext").value = text;
 }
 
 function setEncrypted(text) {
-  document.querySelector('#encrypted').innerHTML = text;
+  document.querySelector("#encrypted").innerHTML = text;
 }
 
 function arrayBufferToBase64(buffer) {
-  var binary = '';
+  var binary = "";
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
   for (var i = 0; i < len; i++) {
@@ -103,44 +103,44 @@ function base64ToArrayBuffer(base64) {
 }
 
 function getSalt() {
-  return window.crypto.getRandomValues(new Uint32Array(2)).join('');
+  return window.crypto.getRandomValues(new Uint32Array(2)).join("");
 }
 
 function showDecryptedPage(decrypted) {
-  document.querySelector('#decrypted').innerHTML = marked(decrypted);
+  document.querySelector("#decrypted").innerHTML = marked(decrypted);
   hideAll();
-  show('#decrypted');
+  show("#decrypted");
 }
 
 function hide(selector) {
-  document.querySelector(selector).style.display = 'none';
+  document.querySelector(selector).style.display = "none";
 }
 
 function hideAll() {
-  hide('#encrypt-tools');
-  hide('#instructions');
-  hide('#password-step');
-  hide('#decrypted');
+  hide("#encrypt-tools");
+  hide("#instructions");
+  hide("#password-step");
+  hide("#decrypted");
   hide("#create-button");
   hide("#download-step");
-  document.querySelector('#encrypt-password').value = "";
-  document.querySelector('#decrypt-password').value = "";
+  document.querySelector("#encrypt-password").value = "";
+  document.querySelector("#decrypt-password").value = "";
 }
 
 function show(selector) {
-  document.querySelector(selector).style.display = 'block';
+  document.querySelector(selector).style.display = "block";
 }
 
 function download() {
   const text = document.documentElement.outerHTML;
-  const filename = document.querySelector('#filename').value;
-  const pom = document.createElement('a');
-  pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  pom.setAttribute('download', filename);
+  const filename = document.querySelector("#filename").value;
+  const pom = document.createElement("a");
+  pom.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+  pom.setAttribute("download", filename);
 
   if (document.createEvent) {
-    var event = document.createEvent('MouseEvents');
-    event.initEvent('click', true, true);
+    var event = document.createEvent("MouseEvents");
+    event.initEvent("click", true, true);
     pom.dispatchEvent(event);
   }
   else {
@@ -149,9 +149,9 @@ function download() {
 }
 
 function scrubPlaintext() {
-  document.querySelector('#decrypted').innerHTML = "";
-  document.querySelector('#plaintext').value = "";
-  document.querySelector('#preview').innerHTML = "";
+  document.querySelector("#decrypted").innerHTML = "";
+  document.querySelector("#plaintext").value = "";
+  document.querySelector("#preview").innerHTML = "";
 }
 
 function passwordChange() {
@@ -165,14 +165,14 @@ function passwordChange() {
 }
 
 function setInstructionsMessage() {
-  document.querySelector('#instructions-message').innerHTML = document.querySelector("#encrypt-message").value;
+  document.querySelector("#instructions-message").innerHTML = document.querySelector("#encrypt-message").value;
   document.querySelector("#encrypt-message").value = "";
 }
 
 async function encryptClick() {
   hideAll();
   passwordChange();
-  show('#password-step');
+  show("#password-step");
 }
 
 async function encrypt2Click() {
@@ -183,7 +183,7 @@ async function encrypt2Click() {
   scrubPlaintext();
   setInstructionsMessage();
   hideAll();
-  show('#download-step');
+  show("#download-step");
 }
 
 function downloadClick() {
@@ -194,7 +194,7 @@ function downloadClick() {
 
 function finishDownloadClick() {
   hideAll();
-  show('#instructions');
+  show("#instructions");
   show("#create-button");
 }
 
@@ -202,38 +202,38 @@ async function decryptClick() {
   var encrypted = getEncrypted();
   const salt = encrypted.split("|")[1];
   encrypted = encrypted.split("|")[0];
-  var plaintext = await decryptData(base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt).catch(error => alert('Error with decryption'));
-  var plaintext = JSON.parse(plaintext);
+  var plaintext = await decryptData(base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt).catch(() => alert("Error with decryption"));
+  plaintext = JSON.parse(plaintext);
   setPlaintext(plaintext);
   showDecryptedPage(plaintext);
 }
 
 function preview() {
-  if(document.querySelector('#plaintext').value.length == 0) {
-    hide('#preview-pane');
+  if(document.querySelector("#plaintext").value.length == 0) {
+    hide("#preview-pane");
   }
   else
   {
-    show('#preview-pane');
-    document.querySelector('#preview').innerHTML = "<h4>Preview:</h4><hr />" + marked(document.querySelector('#plaintext').value) + "<hr />";
+    show("#preview-pane");
+    document.querySelector("#preview").innerHTML = "<h4>Preview:</h4><hr />" + marked(document.querySelector("#plaintext").value) + "<hr />";
   }
 }
 
 function createMode() {
   hideAll();
-  show('#encrypt-tools');
-  document.querySelector('#decrypted').innerHTML = "";
-  document.querySelector('#plaintext').value = "";
-  document.querySelector('#encrypted').value = "";
+  show("#encrypt-tools");
+  document.querySelector("#decrypted").innerHTML = "";
+  document.querySelector("#plaintext").value = "";
+  document.querySelector("#encrypted").value = "";
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector('#encrypt-button').addEventListener('click', encryptClick);
-  document.querySelector('#encrypt-button-2').addEventListener('click', encrypt2Click);
-  document.querySelector('#decrypt-button').addEventListener('click', decryptClick);
-  document.querySelector('#download-button').addEventListener('click', downloadClick);
-  document.querySelector('#skip-download-button').addEventListener('click', finishDownloadClick);
-  document.querySelector('#create-button').addEventListener('click', createMode);
-  document.querySelector('#plaintext').addEventListener('input', preview);
-  document.querySelector('#encrypt-password').addEventListener('input', passwordChange);
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelector("#encrypt-button").addEventListener("click", encryptClick);
+  document.querySelector("#encrypt-button-2").addEventListener("click", encrypt2Click);
+  document.querySelector("#decrypt-button").addEventListener("click", decryptClick);
+  document.querySelector("#download-button").addEventListener("click", downloadClick);
+  document.querySelector("#skip-download-button").addEventListener("click", finishDownloadClick);
+  document.querySelector("#create-button").addEventListener("click", createMode);
+  document.querySelector("#plaintext").addEventListener("input", preview);
+  document.querySelector("#encrypt-password").addEventListener("input", passwordChange);
 });
