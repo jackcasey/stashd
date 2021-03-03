@@ -14,7 +14,7 @@ Alternatively it could be used to make an html file sitting on a desktop that as
 
 To be honest I'm not 100% sure what this thing is useful for and under what exact circumstances it would be preferable compared to a physical document or password protected zip file etc, but it seemed worth existing.
 
-So I built the darn thing. Many sporadically spaced hours later; I present StashD. It is hosted and ready for use at https://jackcasey.github.com/stashd.
+So I built the darn thing. Many sporadically spaced hours later; I present StashD. It is hosted and ready for use at https://jackcasey.github.io/stashd/.
 
 ## How does it work?
 
