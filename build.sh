@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
-mkdir -p dist
-inliner -n page.html > dist/index.html
+mkdir -p docs
+inliner -n page.html > docs/index.html

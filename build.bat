@@ -1,2 +1,2 @@
-if not exist dist mkdir dist
-inliner -n page.html > dist/index.html
+if not exist docs mkdir docs
+inliner -n page.html > docs/index.html
