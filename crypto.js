@@ -5,7 +5,7 @@ const encryptionAlgorithm = "AES-GCM";
 // Key derivation from passphrase
 const hashAlgorithm = "SHA-256";
 const iterations = 1000;
-const keyLength = 48;
+const keyLength = 32;
 
 /* global marked */
 
@@ -20,11 +20,8 @@ async function getDerivation(salt, password, iterations, keyLength) {
   return derivation;
 }
 
-async function getKey(derivation) {
-  const keylen = 32;
-  const derivedKey = derivation.slice(0, keylen);
-  const iv = derivation.slice(keylen);
-  const importedEncryptionKey = await crypto.subtle.importKey("raw", derivedKey, { name: encryptionAlgorithm }, false, ["encrypt", "decrypt"]);
+async function getKey(derivation, iv) {
+  const importedEncryptionKey = await crypto.subtle.importKey("raw", derivation, { name: encryptionAlgorithm }, false, ["encrypt", "decrypt"]);
   return {
     key: importedEncryptionKey,
     iv: iv
@@ -44,16 +41,16 @@ async function decrypt(encryptedText, keyObject) {
   return textDecoder.decode(decryptedText);
 }
 
-async function encryptData(text, password, salt) {
+async function encryptData(text, password, salt, iv) {
   const derivation = await getDerivation(salt, password, iterations, keyLength);
-  const keyObject = await getKey(derivation);
+  const keyObject = await getKey(derivation, iv);
   const encryptedObject = await encrypt(JSON.stringify(text), keyObject);
   return encryptedObject;
 }
 
-async function decryptData(encryptedObject, password, salt) {
+async function decryptData(encryptedObject, password, salt, iv) {
   const derivation = await getDerivation(salt, password, iterations, keyLength);
-  const keyObject = await getKey(derivation);
+  const keyObject = await getKey(derivation, iv);
   const decryptedObject = await decrypt(encryptedObject, keyObject);
   return decryptedObject;
 }
@@ -100,10 +97,6 @@ function base64ToArrayBuffer(base64) {
     bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes.buffer;
-}
-
-function getSalt() {
-  return window.crypto.getRandomValues(new Uint32Array(2)).join("");
 }
 
 function showDecryptedPage(decrypted) {
@@ -176,10 +169,11 @@ async function encryptClick() {
 }
 
 async function encrypt2Click() {
-  const salt = getSalt();
-  var encrypted = await encryptData(getPlaintext(), getPasswordForEncrypt(), salt);
+  const salt = window.crypto.getRandomValues(new Uint32Array(2)).join("");
+  const iv = window.crypto.getRandomValues(new Uint8Array(32));
+  var encrypted = await encryptData(getPlaintext(), getPasswordForEncrypt(), salt, iv);
   encrypted = arrayBufferToBase64(encrypted);
-  setEncrypted(encrypted + "|" + salt);
+  setEncrypted(encrypted + "|" + salt + "|" + arrayBufferToBase64(iv));
   scrubPlaintext();
   setInstructionsMessage();
   hideAll();
@@ -199,10 +193,10 @@ function finishDownloadClick() {
 }
 
 async function decryptClick() {
-  var encrypted = getEncrypted();
-  const salt = encrypted.split("|")[1];
-  encrypted = encrypted.split("|")[0];
-  var plaintext = await decryptData(base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt).catch(() => alert("Error with decryption"));
+  const [encrypted, salt, iv] = getEncrypted().split("|");
+  var plaintext = await decryptData(
+    base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt, base64ToArrayBuffer(iv)
+  ).catch(() => alert("Error with decryption"));
   plaintext = JSON.parse(plaintext);
   setPlaintext(plaintext);
   showDecryptedPage(plaintext);
