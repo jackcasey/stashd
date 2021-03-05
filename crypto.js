@@ -6,6 +6,9 @@ const encryptionAlgorithm = "AES-GCM";
 const hashAlgorithm = "SHA-256";
 const iterations = 1000;
 const keyLength = 32;
+const saltLength = 8; // bytes
+const ivLength = 12; // bytes
+
 
 /* global marked */
 
@@ -79,24 +82,23 @@ function setEncrypted(text) {
   document.querySelector("#encrypted").innerHTML = text;
 }
 
-function arrayBufferToBase64(buffer) {
+function arrayToBase64(byteArray) {
   var binary = "";
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
+  const len = byteArray.byteLength;
   for (var i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
+    binary += String.fromCharCode(byteArray[i]);
   }
-  return window.btoa( binary );
+  return window.btoa(binary);
 }
 
-function base64ToArrayBuffer(base64) {
+function base64ToArray(base64) {
   var binary_string =  window.atob(base64);
   const len = binary_string.length;
   const bytes = new Uint8Array( len );
   for (var i = 0; i < len; i++)        {
     bytes[i] = binary_string.charCodeAt(i);
   }
-  return bytes.buffer;
+  return bytes;
 }
 
 function showDecryptedPage(decrypted) {
@@ -169,11 +171,19 @@ async function encryptClick() {
 }
 
 async function encrypt2Click() {
-  const salt = window.crypto.getRandomValues(new Uint32Array(2)).join("");
-  const iv = window.crypto.getRandomValues(new Uint8Array(32));
+  const salt = window.crypto.getRandomValues(new Uint8Array(saltLength));
+  const iv = window.crypto.getRandomValues(new Uint8Array(ivLength));
   var encrypted = await encryptData(getPlaintext(), getPasswordForEncrypt(), salt, iv);
-  encrypted = arrayBufferToBase64(encrypted);
-  setEncrypted(encrypted + "|" + salt + "|" + arrayBufferToBase64(iv));
+  encrypted = new Uint8Array(encrypted);
+
+  // combine the key derivation salt, the encryption initialisation vector and the encrypted content into 1 payload
+  const payload = new Uint8Array(salt.byteLength + iv.byteLength + encrypted.byteLength);
+
+  payload.set(new Uint8Array(salt)); // 8 bytes
+  payload.set(new Uint8Array(iv), saltLength); // 12 bytes
+  payload.set(encrypted, saltLength + ivLength); // the rest
+
+  setEncrypted(arrayToBase64(payload));
   scrubPlaintext();
   setInstructionsMessage();
   hideAll();
@@ -193,9 +203,15 @@ function finishDownloadClick() {
 }
 
 async function decryptClick() {
-  const [encrypted, salt, iv] = getEncrypted().split("|");
+  const payload = base64ToArray(getEncrypted());
+
+  // chop the payload into the key derivation salt, the encryption initialisation vector and the encrypted content
+  const salt = payload.slice(0, saltLength);
+  const iv = payload.slice(saltLength, saltLength + ivLength);
+  const encrypted = payload.slice(saltLength + ivLength);
+
   var plaintext = await decryptData(
-    base64ToArrayBuffer(encrypted), getPasswordForDecrypt(), salt, base64ToArrayBuffer(iv)
+    encrypted.buffer, getPasswordForDecrypt(), salt, iv.buffer
   ).catch(() => alert("Error with decryption"));
   plaintext = JSON.parse(plaintext);
   setPlaintext(plaintext);
