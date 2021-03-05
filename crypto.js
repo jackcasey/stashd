@@ -6,7 +6,7 @@ const encryptionAlgorithm = "AES-GCM";
 const hashAlgorithm = "SHA-256";
 const iterations = 1000;
 const keyLength = 32;
-const saltLength = 8; // bytes
+const saltLength = 16; // bytes
 const ivLength = 12; // bytes
 
 
@@ -17,8 +17,7 @@ async function getDerivation(salt, password, iterations, keyLength) {
   const passwordBuffer = textEncoder.encode(password);
   const importedKey = await crypto.subtle.importKey("raw", passwordBuffer, "PBKDF2", false, ["deriveBits"]);
 
-  const saltBuffer = textEncoder.encode(salt);
-  const params = {name: "PBKDF2", hash: hashAlgorithm, salt: saltBuffer, iterations: iterations};
+  const params = {name: "PBKDF2", hash: hashAlgorithm, salt: salt, iterations: iterations};
   const derivation = await crypto.subtle.deriveBits(params, importedKey, keyLength*8);
   return derivation;
 }
